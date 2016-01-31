@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+    <meta charset="utf-8">
+    <title>Randoming</title>
+    <style>
+      html, body, #map-canvas {
+        height: 100%;
+        margin: 0px;
+        padding: 0px
+      }
+      #panel {
+        position: absolute;
+        top: 5px;
+        left: 50%;
+        margin-left: -180px;
+        z-index: 5;
+        background-color: #fff;
+        padding: 5px;
+        border: 1px solid #999;
+      }
+    </style>
+    <script src="https://maps.googleapis.com/maps/api/js?v=3.exp&signed_in=true"></script>
+    <script>
+var geocoder;
+var map;
+var infowindow = new google.maps.InfoWindow();
+var marker;
+function initialize() {
+  geocoder = new google.maps.Geocoder();
+  var latlng = new google.maps.LatLng(40.730885,-73.997383);
+  var mapOptions = {
+    zoom: 8,
+    center: latlng,
+    mapTypeId: 'roadmap'
+  }
+  map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
+}
+
+function codeLatLng() {
+  var input = document.getElementById('area').value;
+  var minLat = 40.701446;
+  var maxLat = 40.811871;
+  var minLong = -74.018005;
+  var maxLong = -73.933274;
+  var coord = "0,0";
+  var area = "area";
+  var cnt = 0;
+    while(area!=input && cnt<50){
+      console.log(area);
+      var latlng = new google.maps.LatLng(coord);
+      geocoder.geocode({'latLng': latlng}, function(results,status) {
+        console.log(google.maps.GeocoderStatus);//we were over query limit on this
+        if (status == google.maps.GeocoderStatus.OK) {
+        var lat = (Math.random()*(maxLat-minLat))+minLat;
+        var lng = (Math.random()*(maxLong-minLong))+minLong;
+        //if (results==null ){
+        //  area="0,0";
+        //} else{
+            area = (results[1].address_components[2].long_name);
+            console.log( (results[1].address_components[2].long_name));
+          //};
+        }
+        })
+      cnt++;
+    }
+  console.log(area);
+  geocoder.geocode({'latLng': latlng}, function(results, status) {
+    if (status == google.maps.GeocoderStatus.OK) {
+      if (results[1]) {
+        map.setZoom(11);
+        marker = new google.maps.Marker({
+            position: latlng,
+            map: map
+        });
+        console.log(results[1].address_components[2].long_name);
+        infowindow.setContent(results[1].address_components[2].long_name);//.formatted_address);
+        infowindow.open(map, marker);
+      } else {
+        alert('No results found');
+      }
+    } else {
+      alert('Geocoder failed due to: ' + status);
+    }
+  });
+}
+
+google.maps.event.addDomListener(window, 'load', initialize);
+
+    </script>
+    <style>
+      #panel {
+        position: absolute;
+        top: 5px;
+        left: 50%;
+        margin-left: -180px;
+        width: 350px;
+        z-index: 5;
+        background-color: #fff;
+        padding: 5px;
+        border: 1px solid #999;
+      }
+      #latlng {
+        width: 225px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="panel">
+            <!--input id="latlng" type="text" value="40.714224,-73.961452"-->
+      <input id="area" type="text" value="Manhattan">
+      <input type="button" value="Let's Random!" onclick="codeLatLng()">
+    </div>
+    <div id="map-canvas"></div>
+  </body>
+</html>
